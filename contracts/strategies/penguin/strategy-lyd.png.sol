@@ -3,7 +3,7 @@ pragma solidity ^0.6.7;
 
 import "../strategy-pefi-base-lp.sol";
 
-contract PenguinStrategyLydPng is PefiStrategyForLP {
+contract PenguinStrategyPngLyd is PefiStrategyForLP {
     uint256 public xPefiPerShare; //stores cumulative xPEFI per share, scaled up by 1e18
     uint256 public NEST_STAKING_BIPS; //share of rewards sent to the nest on behalf of users
     mapping(address => uint256) public xPefiDebt; //pending xPEFI for any address is (its balance * xPefiPerShare) - (its xPefiDebt)
