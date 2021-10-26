@@ -5,41 +5,52 @@ async function main() {
   const pools = [
     // {
     //   name: "JoeAvaxJoe",
+    //   // strategy_addr: "0x3821Dd43dA32c22ff38A344C2b70E970FCB19239",
     //   snowglobe_addr: "0xcC757081C972D0326de42875E0DA2c54af523622",
-    //   strategy_addr: "0x3821Dd43dA32c22ff38A344C2b70E970FCB19239",
-    //   harvest: true,
-    //   earn: true,
     //   addGauge: true,
     //   setGlobe: true,
+    //   whitelist: true,
+    //   earn: true,
+    //   harvest: true,
     // },
     // {
     //   name: "JoeAvaxXava",
+    //   // strategy_addr: "0x67826ABE6B06B1469569c18787b90f5747B4D948",
     //   snowglobe_addr: "0x0B2C4f6C54182EDeE30DFF69Be972f9E04888321",
-    //   harvest: true,
-    //   earn: true,
     //   addGauge: true,
     //   setGlobe: true,
+    //   whitelist: true,
+    //   earn: true,
+    //   harvest: true,
     // },
     // {
     //   name: "JoeAvaxYak",
+    //   // strategy_addr: "0x7625c966CB3Cd43d84bce81d6A8b76b8Adc66121",
     //   snowglobe_addr: "0x9854F6615f73e533940F90FfE8DB1eAFB424A3c7",
-    //   harvest: true,
-    //   earn: true,
     //   addGauge: true,
     //   setGlobe: true,
+    //   whitelist: true,
+    //   earn: true,
+    //   harvest: true,
     // },
     {
       name: "JoeAvaxSpell",
+      strategy_addr: "0xA54579E2C59Be00E92B63440492E817dBA398AA9",
       snowglobe_addr: "0xec54A22B53EE66a77C5F26F860c6913472199661",
-      strategy_addr: "0x7E7F4522911A537811AA7A37eAD9FbdD52B50447",
-      harvest: false,
-      earn: false,
       addGauge: true,
-      setGlobe: true,
       approveStrategy: true,
       setStrategy: true,
+      setGlobe: true,
+      whitelist: true,
+      earn: true,
+      harvest: true,
     },
   ];
+
+  const controller_addr = "0xf7B8D9f8a82a7a6dd448398aFC5c77744Bd6cb85"; //Base
+  // const controller_addr = "0xACc69DEeF119AB5bBf14e6Aaf0536eAFB3D6e046"; //Backup
+  // const controller_addr = "0xFb7102506B4815a24e3cE3eAA6B834BE7a5f2807"; // bankerJoe
+  // const controller_addr = "0x425A863762BBf24A986d8EaE2A367cb514591C6F"; //Aave
 
   const [deployer] = await ethers.getSigners();
   console.log("Mending deployment with the account:", deployer.address);
@@ -54,11 +65,6 @@ async function main() {
   const timelock_addr = governance_addr;
   const gaugeproxy_addr = "0x215D5eDEb6A6a3f84AE9d72962FEaCCdF815BF27";
   const strategist_addr = "0xc9a51fB9057380494262fd291aED74317332C0a2";
-
-  // const controller_addr = "0xf7B8D9f8a82a7a6dd448398aFC5c77744Bd6cb85"; //Base
-  // const controller_addr = "0xACc69DEeF119AB5bBf14e6Aaf0536eAFB3D6e046"; //Backup
-  const controller_addr = "0xFb7102506B4815a24e3cE3eAA6B834BE7a5f2807"; // bankerJoe
-  // const controller_addr = "0x425A863762BBf24A986d8EaE2A367cb514591C6F"; //Aave
 
   const Controller = new ethers.Contract(controller_addr, controller_ABI, deployer);
 
@@ -80,6 +86,9 @@ async function main() {
       Strategy = new ethers.Contract(pool.strategy_addr, strategy_ABI, deployer);
       console.log(`connected to ${strategy_name} at : ${Strategy.address}`);
     }
+
+    // Strategy.setController(controller_addr);
+    // console.log(`reset contoller to for ${strategy_name} to : ${controller_addr}`);
     
     /* Deploy Snowglobe */
     if (!pool.snowglobe_addr) {
