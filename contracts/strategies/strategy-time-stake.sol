@@ -4,15 +4,19 @@ pragma solidity ^0.6.7;
 import "../lib/ownable.sol"; 
 import "../lib/safe-math.sol";
 import "../lib/erc20.sol";
+import "./strategy-base.sol";
+import "../interfaces/wonderland.sol"; 
 
-contract TimeStaking is Ownable {
+abstract contract TimeStaking is StrategyBase{
 
     using SafeMath for uint256;
     using SafeMath for uint32;
     using SafeERC20 for IERC20;
 
+    //Tokens
     address public immutable Time;
     address public immutable Memories;
+
 
     struct Epoch {
         uint number;
@@ -58,16 +62,20 @@ contract TimeStaking is Ownable {
     }
     mapping( address => Claim ) public warmupInfo;
 
+
     /**
-        @notice stake OHM to enter warmup
+        @notice stake TIME to enter warmup
         @param _amount uint
         @return bool
      */
     function stake( uint _amount, address _recipient ) external returns ( bool ) {
+
+        //the protocol making sure that you own the right proportion of the treasury balancer
         rebase();
         
         IERC20( Time ).safeTransferFrom( msg.sender, address(this), _amount );
 
+        //The warmup period is a number of epochs before a staker can take their MEMOries.
         Claim memory info = warmupInfo[ _recipient ];
         require( !info.lock, "Deposits for account are locked" );
 
@@ -83,7 +91,7 @@ contract TimeStaking is Ownable {
     }
 
     /**
-        @notice retrieve sOHM from warmup
+        @notice retrieve MEMOries from warmup
         @param _recipient address
      */
     function claim ( address _recipient ) public {
@@ -95,7 +103,7 @@ contract TimeStaking is Ownable {
     }
 
     /**
-        @notice forfeit sOHM in warmup and retrieve OHM
+        @notice forfeit MEMOries in warmup and retrieve TIME
      */
     function forfeit() external {
         Claim memory info = warmupInfo[ msg.sender ];
@@ -113,20 +121,24 @@ contract TimeStaking is Ownable {
     }
 
     /**
-        @notice redeem sOHM for OHM
+        @notice redeem MEMOries for TIME
         @param _amount uint
         @param _trigger bool
      */
     function unstake( uint _amount, bool _trigger ) external {
         if ( _trigger ) {
+            //the protocol making sure that you own the right proportion of the treasury balancer
             rebase();
         }
+
+        //changes MEMOries to TIME
         IERC20( Memories ).safeTransferFrom( msg.sender, address(this), _amount );
         IERC20( Time ).safeTransfer( msg.sender, _amount );
     }
 
+
     /**
-        @notice returns the sOHM index, which tracks rebase growth
+        @notice returns the MEMOries index, which tracks rebase growth
         @return uint
      */
     function index() public view returns ( uint ) {
@@ -148,6 +160,7 @@ contract TimeStaking is Ownable {
                 IDistributor( distributor ).distribute();
             }
 
+            //TIME balance
             uint balance = contractBalance();
             uint staked = IMemo( Memories ).circulatingSupply();
 
@@ -160,7 +173,7 @@ contract TimeStaking is Ownable {
     }
 
     /**
-        @notice returns contract OHM holdings, including bonuses provided
+        @notice returns contract TIME holdings, including bonuses provided
         @return uint
      */
     function contractBalance() public view returns ( uint ) {
@@ -193,7 +206,7 @@ contract TimeStaking is Ownable {
         @notice sets the contract address for LP staking
         @param _contract address
      */
-    function setContract( CONTRACTS _contract, address _address ) external onlyManager() {
+    function setContract( CONTRACTS _contract, address _address ) public {
         if( _contract == CONTRACTS.DISTRIBUTOR ) { // 0
             distributor = _address;
         } else if ( _contract == CONTRACTS.WARMUP ) { // 1
@@ -209,7 +222,7 @@ contract TimeStaking is Ownable {
      * @notice set warmup period in epoch's numbers for new stakers
      * @param _warmupPeriod uint
      */
-    function setWarmup( uint _warmupPeriod ) external onlyManager() {
+    function setWarmup( uint _warmupPeriod ) public {
         warmupPeriod = _warmupPeriod;
     }
 }
