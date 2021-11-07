@@ -84,7 +84,6 @@ const returnController = (controller => {
   return address
 })
 
-
 module.exports = {
   toWei,
   fromWei,
@@ -95,5 +94,5 @@ module.exports = {
   returnSigner,
   fastForwardAWeek,
   findSlot,
-  returnController
+  returnController,
 };

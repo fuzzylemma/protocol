@@ -1,4 +1,3 @@
-const hre = require("hardhat");
 const { ethers, network } = require("hardhat");
 
 const setupSigners = async () => {

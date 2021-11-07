@@ -12,7 +12,7 @@ const stratABI = [{"inputs":[{"internalType":"address","name":"_want","type":"ad
 const tests = [
   
     {
-      name: "JoeAvaxApex",
+      name: "PenguinStrategyEthAvax",
       controllerAddress: "",
       snowglobeAddress: "",
     },
