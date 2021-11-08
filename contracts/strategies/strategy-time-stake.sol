@@ -125,7 +125,7 @@ abstract contract TimeStaking is StrategyBase{
         @param _amount uint
         @param _trigger bool
      */
-    function unstake( uint _amount, bool _trigger ) external {
+    function unstake( uint _amount, bool _trigger ) public {
         if ( _trigger ) {
             //the protocol making sure that you own the right proportion of the treasury balancer
             rebase();
