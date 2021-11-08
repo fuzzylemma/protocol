@@ -35,6 +35,29 @@ abstract contract StrategyTimeFarm is TimeStaking{
 
 function harvest() public override onlyBenevolent {
 
+    //if we reach the end of an 8 hour period, then we call the rebase function 
+    if( epoch.endTime <= uint32(block.timestamp) ){
+
+    } 
+    //get the original balance of the Time tokens
+    uint256 _time = IERC20(Time).balanceOf( address(this));
+
+    /**
+     call the unstake function that rebases to get the right proportion of the treasury balancer, 
+     i.e. determine the amount of MEMOries tokens accumulated during vesting period. 
+     As well transfers MEMOries token to Time tokens
+     */
+    unstake();
+
+
+
+
+    //call the unstake function to unstake MEMO. 
+    //Determine the delta value of the accumulated TIME and OG TIME after each epoch
+    //take 10% of that fee and invest it into our snowglobe 
+
+    
+
     
       //check the balance of Time Tokens. 
         uint256 _TIME = IERC20(Time).balanceOf(address(this));
