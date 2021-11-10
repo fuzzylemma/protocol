@@ -33,12 +33,19 @@ abstract contract StrategyTimeFarm is TimeStaking{
     }
 
 
+function deposit () public override {
+    uint256 _want = IERC20(Time).balanceOf(address(this));
+    if (_want > 0){
+        IERC20(Time).safeApprove(Time, 0);
+        IERC20(Time).safeApprove(Time, _want);
+        //ITimeStaking(Time).stake( _want, address(this)); 
+
+    }
+}
+
 function harvest() public override onlyBenevolent {
 
-    //if we reach the end of an 8 hour period, then we call the rebase function 
-    if( epoch.endTime <= uint32(block.timestamp) ){
-
-    } 
+    //find before getting to harvest because all of it has been
     //get the original balance of the Time tokens
     uint256 _time = IERC20(Time).balanceOf( address(this));
 
@@ -47,25 +54,24 @@ function harvest() public override onlyBenevolent {
      i.e. determine the amount of MEMOries tokens accumulated during vesting period. 
      As well transfers MEMOries token to Time tokens
      */
-    unstake();
+
+     //depends on the contract!!!!!!!!
+    ITimeStaking(Memories).unstake(_time, true);
 
 
+    uint256 _afterTime = IERC20(Time).balanceOf( address(this));
 
-
-    //call the unstake function to unstake MEMO. 
     //Determine the delta value of the accumulated TIME and OG TIME after each epoch
+    uint256 deltaTime = _afterTime.sub(_time); 
+
     //take 10% of that fee and invest it into our snowglobe 
 
-    
 
-    
-      //check the balance of Time Tokens. 
         uint256 _TIME = IERC20(Time).balanceOf(address(this));
-        if (_TIME > 0){
-           uint256 _keep = _TIME.mul(keep).div(keepMax);
-           if (_keep > 0){
+        if (deltaTime > 0){
+           uint256 _keep = deltaTime.mul(keep).div(keepMax);
                _takeFeeTimeToSnob(_keep);
-           }
+            
         }
 }
 

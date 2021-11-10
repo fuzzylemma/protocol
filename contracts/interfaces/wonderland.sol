@@ -24,3 +24,7 @@ interface IMemo {
 interface IWarmup {
     function retrieve( address staker_, uint amount_ ) external;
 }
+
+interface ITimeStaking {
+    function unstake(uint256 _amount, bool _trigger) external; 
+}
