@@ -26,5 +26,11 @@ interface IWarmup {
 }
 
 interface ITimeStaking {
+    function stake(uint _amount, address _recipient) external view returns ( bool ); 
+
+    function claim(address _recipient) external; 
+
     function unstake(uint256 _amount, bool _trigger) external; 
+
+   
 }
