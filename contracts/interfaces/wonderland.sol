@@ -30,7 +30,21 @@ interface ITimeStaking {
 
     function claim(address _recipient) external; 
 
+    function index() external view returns ( uint ); 
+
     function unstake(uint256 _amount, bool _trigger) external; 
+
+    function contractBalance() external view returns ( uint );
+
+    function forfeit() external; 
+
+    function giveLockBonus( uint _amount) external; 
+
+    function returnLockBonus(uint _amount) external;
+
+    function toggleDepositLock() external;
+
+    function setWarmup( uint _warmupPeriod) external; 
 
    
 }
