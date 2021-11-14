@@ -25,6 +25,8 @@ interface IWarmup {
     function retrieve( address staker_, uint amount_ ) external;
 }
 
+enum CONTRACTS { DISTRIBUTOR, WARMUP, LOCKER }
+
 interface ITimeStaking {
     function stake(uint _amount, address _recipient) external view returns ( bool ); 
 
@@ -45,6 +47,8 @@ interface ITimeStaking {
     function toggleDepositLock() external;
 
     function setWarmup( uint _warmupPeriod) external; 
+
+    function setContract( CONTRACTS _contract, address _address ) external; 
 
    
 }

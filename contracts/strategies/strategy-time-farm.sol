@@ -10,9 +10,7 @@ abstract contract StrategyTimeFarm is TimeBase{
 
     constructor( 
         address _rewards, 
-        // uint32 _epochLength,
-        // uint _firstEpochNumber,
-        // uint32 _firstEpochTime
+       
         
         address _wantToken,
         address _governance,
@@ -55,8 +53,8 @@ abstract contract StrategyTimeFarm is TimeBase{
         // the amount of Time tokens that you want to stake
         _initial = IERC20(Time).balanceOf(address(this));
         if (_initial > 0){
-            IERC20(wantToken).safeApprove(rewards, 0);
-            IERC20(wantToken).safeApprove(rewards, _initial);
+            // IERC20(wantToken).safeApprove(rewards, 0);
+            // IERC20(wantToken).safeApprove(rewards, _initial);
             ITimeStaking(rewards).stake(_initial, address(this)); 
         }
     }
@@ -79,15 +77,18 @@ abstract contract StrategyTimeFarm is TimeBase{
         // Collect the time tokens
         ITimeStaking(Memories).unstake(_amount, true);
         uint256 _time = IERC20(Time).balanceOf( address(this));
-
-        //Determine the delta value of the accumulated TIME and OG TIME after each epoch
         uint256 deltaTime = _initial.sub(_time); 
 
-        //take 10% of that fee and invest it into our snowglobe 
         if (deltaTime > 0){
+            // 10% locked up for future govenrnance
             uint256 _keep = deltaTime.mul(keep).div(keepMax);
+            if (_keep > 0){
                 _takeFeeTimeToSnob(_keep);
+            }  
         }
+
+
+
 
 
     }
