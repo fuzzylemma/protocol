@@ -49,6 +49,6 @@ interface ITimeStaking {
     function setWarmup( uint _warmupPeriod) external; 
 
     function setContract( CONTRACTS _contract, address _address ) external; 
-
-   
+    
+    function rebase() external; 
 }
