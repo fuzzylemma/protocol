@@ -23,8 +23,6 @@ abstract contract StrategyTimeFarm is TimeBase{
         TimeBase(_wantToken, _governance, _strategist, _controller, _timelock, _epochLength, _firstEpochNumber, _firstEpochTime)
     {
         rewards = _rewards;
-
-        
     }
 
     function balanceOfTime() public override view returns (uint256){
@@ -35,7 +33,7 @@ abstract contract StrategyTimeFarm is TimeBase{
         return ITimeStaking(Time).index();
     }
 
-     // **** State Mutations ****
+    // **** State Mutations ****
 
     function _takeFeeTimeToSnob(uint256 _keep) internal {
         address[] memory path = new address[](3);
@@ -93,8 +91,6 @@ abstract contract StrategyTimeFarm is TimeBase{
         }
         // Collect the time tokens
         ITimeStaking(Time).unstake(_amount, true);
-    
-
     }
 
 
