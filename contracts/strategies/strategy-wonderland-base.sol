@@ -61,14 +61,28 @@ abstract contract TimeBase {
     address public strategist;
     address public timelock;
 
+    address public distributor;
+
     mapping(address => bool) public harvesters;
+
+    struct Epoch {
+        uint number;
+        uint distribute;
+        uint32 length;
+        uint32 endTime;
+    }
+
+    Epoch public epoch;
 
     constructor (
         address _wantToken,
         address _governance,
         address _strategist,
         address _controller,
-        address _timelock
+        address _timelock,
+        uint32 _epochLength,
+        uint _firstEpochNumber,
+        uint32 _firstEpochTime
     ) public {
         require(_wantToken != address(0));
         require(_governance != address(0));
@@ -81,6 +95,13 @@ abstract contract TimeBase {
         strategist = _strategist;
         controller = _controller;
         timelock = _timelock;
+
+        epoch = Epoch({
+            length: _epochLength,
+            number: _firstEpochNumber,
+            endTime: _firstEpochTime,
+            distribute: 0
+        });
     }
 
     // **** Modifiers **** //
@@ -100,7 +121,7 @@ abstract contract TimeBase {
         return IERC20(wantToken).balanceOf(address(this));
     }
 
-    function balanceBeingStaked() public virtual view returns (uint256);
+    function balanceOfTime() public virtual view returns (uint256);
 
 
 
@@ -203,6 +224,8 @@ abstract contract TimeBase {
     }
 
     function harvest() public virtual;
+
+    function reStake() public virtual;
 
     function _withdrawSome(uint256 _amount) internal virtual returns (uint256);
 
