@@ -79,6 +79,10 @@ interface ITimeBondDepository {
     
     function deposit( uint _amount, uint _maxPrice, address _depositor) external payable returns ( uint );
 
-    function redeem( address _recipient, bool _stake ) external returns ( uint ) 
+    function redeem( address _recipient, bool _stake ) external returns ( uint );
+
+    function stakeOrSend( address _recipient, bool _stake, uint _amount ) external returns ( uint );
+
+    
 
 }
