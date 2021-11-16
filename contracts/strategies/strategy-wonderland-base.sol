@@ -65,24 +65,13 @@ abstract contract TimeBase {
 
     mapping(address => bool) public harvesters;
 
-    struct Epoch {
-        uint number;
-        uint distribute;
-        uint32 length;
-        uint32 endTime;
-    }
-
-    Epoch public epoch;
 
     constructor (
         address _wantToken,
         address _governance,
         address _strategist,
         address _controller,
-        address _timelock,
-        uint32 _epochLength,
-        uint _firstEpochNumber,
-        uint32 _firstEpochTime
+        address _timelock
     ) public {
         require(_wantToken != address(0));
         require(_governance != address(0));
@@ -95,13 +84,6 @@ abstract contract TimeBase {
         strategist = _strategist;
         controller = _controller;
         timelock = _timelock;
-
-        epoch = Epoch({
-            length: _epochLength,
-            number: _firstEpochNumber,
-            endTime: _firstEpochTime,
-            distribute: 0
-        });
     }
 
     // **** Modifiers **** //
@@ -117,14 +99,20 @@ abstract contract TimeBase {
 
     // **** Views **** //
 
-    function balanceOfWant() public view returns (uint256) {
+     function balanceOfWant() public view returns (uint256) {
         return IERC20(wantToken).balanceOf(address(this));
     }
 
-    function balanceOfTime() public virtual view returns (uint256);
+    function balanceOfPool() public virtual view returns (uint256);
 
+    function balanceOf() public view returns (uint256) {
+        return balanceOfWant().add(balanceOfPool());
+    }
 
+     function balanceOfTime() public virtual view returns (uint256);
 
+    function getName() external virtual pure returns (string memory);
+  
     function whitelistHarvester(address _harvester) external {
         require(msg.sender == governance ||
             msg.sender == strategist, "not authorized");
@@ -186,6 +174,8 @@ abstract contract TimeBase {
 
     // **** State mutations **** //
     function deposit() public virtual;
+
+    function depositLP() public virtual;
 
     // Controller only function for creating additional rewards from dust
     function withdraw(IERC20 _asset) external returns (uint256 balance) {

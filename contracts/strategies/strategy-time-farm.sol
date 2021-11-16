@@ -3,26 +3,27 @@ pragma solidity ^0.6.7;
 
 import "./strategy-wonderland-base.sol";
 
-abstract contract StrategyTimeFarm is TimeBase{
+abstract contract TimeFarm is TimeBase{
 
-    address public rewards = 0x4456B87Af11e87E329AB7d7C7A246ed1aC2168B9; 
+    address public rewards; 
+    address public treasury = 0x1c46450211CB2646cc1DA3c5242422967eD9e04c;
+
+
+    uint profit;
     uint256 public _initial; 
 
     constructor( 
-        address _rewards, 
-        address _wantToken,
+        address _rewards,
+        address _mint,
         address _governance,
         address _strategist,
         address _controller,
-        address _timelock,
-        uint32 _epochLength,
-        uint _firstEpochNumber,
-        uint32 _firstEpochTime
+        address _timelock
     ) 
         public 
-        TimeBase(_wantToken, _governance, _strategist, _controller, _timelock, _epochLength, _firstEpochNumber, _firstEpochTime)
+        TimeBase(_mint, _governance, _strategist, _controller, _timelock)
     {
-        rewards = _rewards;
+        rewards = _rewards; 
     }
 
     function balanceOfTime() public override view returns (uint256){
@@ -55,12 +56,19 @@ abstract contract StrategyTimeFarm is TimeBase{
     // deposits the Time token in the staking contract 
     function deposit () public override {
         // the amount of Time tokens that you want to stake
-        _initial = IERC20(Time).balanceOf(address(this));
-        if (_initial > 0){
-            IERC20(wantToken).safeApprove(rewards, 0);
-            IERC20(wantToken).safeApprove(rewards, _initial);
-            ITimeStaking(rewards).stake(_initial, address(this)); 
+        uint256 _want = IERC20(Time).balanceOf(address(this));
+        if (_want > 0){
+            IERC20(Time).safeApprove(rewards, 0);
+            IERC20(Time).safeApprove(rewards, _want);
+            ITimeStaking(rewards).stake(_want, address(this)); 
         }
+    }
+
+    // deposits other asset to be minted into Time and then staked 
+    function depositLP() public override {
+        uint256 _amount = IERC20(wantToken).balanceOf(address(this));
+        ITimeTreasury(treasury).deposit(_amount, wantToken, profit);
+        deposit();  
     }
 
 

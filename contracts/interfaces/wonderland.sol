@@ -59,17 +59,11 @@ interface ITreasury {
     function mintRewards( address _recipient, uint _amount ) external;
 }
 
-interface ITimeBondDepository {
-    function initializeBondTerms( 
-        uint _controlVariable, 
-        uint _minimumPrice,
-        uint _maxPayout,
-        uint _maxDebt,
-        uint _initialDebt,
-        uint32 _vestingTerm
-    ) external;
 
-    enum PARAMETER { VESTING, PAYOUT, DEBT, MINPRICE }
+enum PARAMETER { VESTING, PAYOUT, DEBT, MINPRICE }
+
+interface ITimeBondDepository {
+    function initializeBondTerms(uint _controlVariable, uint _minimumPrice, uint _maxPayout, uint _maxDebt, uint _initialDebt, uint32 _vestingTerm) external;
 
     function setBondTerms ( PARAMETER _parameter, uint _input ) external; 
 
@@ -83,6 +77,15 @@ interface ITimeBondDepository {
 
     function stakeOrSend( address _recipient, bool _stake, uint _amount ) external returns ( uint );
 
-    
+}
 
+interface ITimeTreasury {
+    function deposit( uint _amount, address _token, uint _profit ) external returns ( uint send_ ); 
+    
+    function withdraw( uint _amount, address _token ) external; 
+
+    function mintRewards( address _recipient, uint _amount ) external; 
+
+    function valueOf( address _token, uint _amount ) external view returns ( uint value_ ); 
+   
 }
