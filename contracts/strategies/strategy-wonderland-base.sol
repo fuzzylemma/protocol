@@ -25,6 +25,9 @@ abstract contract TimeBase {
     address public immutable Time = 0xb54f16fB19478766A268F172C9480f8da1a7c9C3;
     address public immutable Memories = 0x136Acd46C134E8269052c62A67042D6bDeDde3C9;
 
+    address public stakingHelper;                                                       // to stake and claim if no staking warmup
+    bool public useHelper;
+
     // Dex
     address public constant joeRouter = 0x60aE616a2155Ee3d9A68541Ba4544862310933d4;
 
@@ -175,7 +178,9 @@ abstract contract TimeBase {
     // **** State mutations **** //
     function deposit() public virtual;
 
-    function depositLP() public virtual;
+    function depositIntoTime() public virtual;
+
+    function stakeOrSend ( address _recipient, bool _stake, uint _amount ) public virtual returns (uint256); 
 
     // Controller only function for creating additional rewards from dust
     function withdraw(IERC20 _asset) external returns (uint256 balance) {

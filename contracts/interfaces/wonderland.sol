@@ -79,6 +79,9 @@ interface ITimeBondDepository {
 
 }
 
+
+
+// needed and used 
 interface ITimeTreasury {
     function deposit( uint _amount, address _token, uint _profit ) external returns ( uint send_ ); 
     
@@ -88,4 +91,12 @@ interface ITimeTreasury {
 
     function valueOf( address _token, uint _amount ) external view returns ( uint value_ ); 
    
+}
+
+interface IStaking {
+    function stake( uint _amount, address _recipient ) external returns ( bool );
+}
+
+interface IStakingHelper {
+    function stake( uint _amount, address _recipient ) external;
 }

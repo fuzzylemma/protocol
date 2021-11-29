@@ -53,7 +53,7 @@ abstract contract TimeFarm is TimeBase{
         );
     }
 
-    // deposits the Time token in the staking contract 
+    // Deposits the Time token in the staking contract 
     function deposit () public override {
         // the amount of Time tokens that you want to stake
         uint256 _want = IERC20(Time).balanceOf(address(this));
@@ -64,22 +64,33 @@ abstract contract TimeFarm is TimeBase{
         }
     }
 
-    // deposits other asset to be minted into Time and then staked 
-    function depositLP() public override {
+    // Stakes Time payout in the automatically or returns to the user if they do not want to continue staking
+    function stakeOrSend ( address _recipient, bool _stake, uint _amount) public override returns (uint256) {
+        uint256 _want = IERC20(Time).balanceOf(address(this));
+        // if user does not want to stake 
+        if (!_stake) {
+            IERC20(Time).transfer( _recipient, _amount );       // send payout
+        }else {                                                 // if user wants to stake
+            if (useHelper) {                                    // if stake warmup is 0
+                IERC20(Time).approve(stakingHelper, _want);
+                IStakingHelper(stakingHelper).stake(_want, _recipient);
+            }else {
+                IERC20(Time).approve(rewards, _want);
+                IStaking(rewards).stake( _want, _recipient );
+            }
+        }
+
+        return _want; 
+    }
+   
+
+
+    // Deposits other asset to be minted into Time and then staked 
+    function depositIntoTime() public override {
         uint256 _amount = IERC20(wantToken).balanceOf(address(this));
         ITimeTreasury(treasury).deposit(_amount, wantToken, profit);
         deposit();  
     }
-
-
-    /**
-        @notice we have to restake time tokens whenever the epoch is over
-    */
-    function reStake() public override {
-        ITimeStaking(Time).rebase(); 
-        deposit(); 
-    }
-
 
     /**
         calls the unstake function that rebases to get the right proportion of the treasury balancer, 
