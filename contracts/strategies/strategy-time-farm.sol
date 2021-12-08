@@ -34,24 +34,6 @@ abstract contract TimeFarm is TimeBase{
         return ITimeStaking(Time).index();
     }
 
-    // **** State Mutations ****
-
-    function _takeFeeTimeToSnob(uint256 _keep) internal {
-        address[] memory path = new address[](3);
-        path[0] = Time;
-        path[1] = wavax;
-        path[2] = snob;
-        IERC20(Time).safeApprove(joeRouter, 0);
-        IERC20(Time).safeApprove(joeRouter, _keep);
-        _swapTraderJoeWithPath(path, _keep);
-        uint256 _snob = IERC20(snob).balanceOf(address(this));
-        uint256 _share = _snob.mul(revenueShare).div(revenueShareMax);
-        IERC20(snob).safeTransfer(feeDistributor, _share);
-        IERC20(snob).safeTransfer(
-            IController(controller).treasury(),
-            _snob.sub(_share)
-        );
-    }
 
     // Deposits the Time token in the staking contract 
     function deposit () public override {
@@ -87,8 +69,8 @@ abstract contract TimeFarm is TimeBase{
 
     // Deposits other asset to be minted into Time and then staked 
     function depositIntoTime() public override {
-        uint256 _amount = IERC20(wantToken).balanceOf(address(this));
-        ITimeTreasury(treasury).deposit(_amount, wantToken, profit);
+        uint256 _amount = IERC20(want).balanceOf(address(this));
+        ITimeTreasury(treasury).deposit(_amount, want, profit);
         deposit();  
     }
 
@@ -110,6 +92,8 @@ abstract contract TimeFarm is TimeBase{
         }
         // Collect the time tokens
         ITimeStaking(Time).unstake(_amount, true);
+
+        _distributePerformanceFeesAndDeposit();
     }
 
 

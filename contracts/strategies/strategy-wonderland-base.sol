@@ -19,11 +19,12 @@ abstract contract TimeBase {
     using SafeERC20 for IERC20;
 
     // Tokens
-    address public wantToken; 
-    address public wavax = 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7;
-    address public snob = 0xC38f41A296A4493Ff429F1238e030924A1542e50;
-    address public immutable Time = 0xb54f16fB19478766A268F172C9480f8da1a7c9C3;
-    address public immutable Memories = 0x136Acd46C134E8269052c62A67042D6bDeDde3C9;
+    address public want; 
+    address public constant joe = 0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd;
+    address public constant wavax = 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7;
+    address public constant snob = 0xC38f41A296A4493Ff429F1238e030924A1542e50;
+    address public constant Time = 0xb54f16fB19478766A268F172C9480f8da1a7c9C3;
+    address public constant Memories = 0x136Acd46C134E8269052c62A67042D6bDeDde3C9;
 
     address public stakingHelper;                                                       // to stake and claim if no staking warmup
     bool public useHelper;
@@ -70,19 +71,19 @@ abstract contract TimeBase {
 
 
     constructor (
-        address _wantToken,
+        address _want,
         address _governance,
         address _strategist,
         address _controller,
         address _timelock
     ) public {
-        require(_wantToken != address(0));
+        require(_want != address(0));
         require(_governance != address(0));
         require(_strategist != address(0));
         require(_controller != address(0));
         require(_timelock != address(0));
 
-        wantToken = _wantToken;
+        want = _want;
         governance = _governance;
         strategist = _strategist;
         controller = _controller;
@@ -103,7 +104,7 @@ abstract contract TimeBase {
     // **** Views **** //
 
      function balanceOfWant() public view returns (uint256) {
-        return IERC20(wantToken).balanceOf(address(this));
+        return IERC20(want).balanceOf(address(this));
     }
 
     function balanceOfPool() public virtual view returns (uint256);
@@ -185,7 +186,7 @@ abstract contract TimeBase {
     // Controller only function for creating additional rewards from dust
     function withdraw(IERC20 _asset) external returns (uint256 balance) {
         require(msg.sender == controller, "!controller");
-        require(wantToken != address(_asset), "want");
+        require(want != address(_asset), "want");
         balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
@@ -193,7 +194,7 @@ abstract contract TimeBase {
     // Withdraw partial funds, normally used with a globe withdrawal
     function withdraw(uint256 _amount) external {
         require(msg.sender == controller, "!controller");
-        uint256 _balance = IERC20(wantToken).balanceOf(address(this));
+        uint256 _balance = IERC20(want).balanceOf(address(this));
         if (_balance < _amount) {
             _amount = _withdrawSome(_amount.sub(_balance));
             _amount = _amount.add(_balance);
@@ -202,20 +203,20 @@ abstract contract TimeBase {
         uint256 _feeDev = _amount.mul(withdrawalDevFundFee).div(
             withdrawalDevFundMax
         );
-        IERC20(wantToken).safeTransfer(IController(controller).devfund(), _feeDev);
+        IERC20(want).safeTransfer(IController(controller).devfund(), _feeDev);
 
         uint256 _feeTreasury = _amount.mul(withdrawalTreasuryFee).div(
             withdrawalTreasuryMax
         );
-        IERC20(wantToken).safeTransfer(
+        IERC20(want).safeTransfer(
             IController(controller).treasury(),
             _feeTreasury
         );
 
-        address _globe = IController(controller).globes(address(wantToken));
+        address _globe = IController(controller).globes(address(want));
         require(_globe != address(0), "!globe"); // additional protection so we don't burn the funds
 
-        IERC20(wantToken).safeTransfer(_globe, _amount.sub(_feeDev).sub(_feeTreasury));
+        IERC20(want).safeTransfer(_globe, _amount.sub(_feeDev).sub(_feeTreasury));
     }
 
     function harvest() public virtual;
@@ -223,6 +224,42 @@ abstract contract TimeBase {
     function reStake() public virtual;
 
     function _withdrawSome(uint256 _amount) internal virtual returns (uint256);
+
+    // **** Internal functions ****
+    function _swapTraderJoe(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) internal {
+        require(_to != address(0));
+        // Swap with TraderJoe
+        IERC20(_from).safeApprove(joeRouter, 0);
+        IERC20(_from).safeApprove(joeRouter, _amount);
+        address[] memory path;
+        if (_from == joe || _to == joe) {
+            path = new address[](2);
+            path[0] = _from;
+            path[1] = _to;
+        } 
+        else if (_from == wavax || _to == wavax) {
+            path = new address[](2);
+            path[0] = _from;
+            path[1] = _to;
+        } 
+        else {
+            path = new address[](3);
+            path[0] = _from;
+            path[1] = wavax;
+            path[2] = _to;
+        }
+        IJoeRouter(joeRouter).swapExactTokensForTokens(
+            _amount,
+            0,
+            path,
+            address(this),
+            now.add(60)
+        );
+    }
 
     function _swapTraderJoeWithPath(address[] memory path, uint256 _amount)
         internal
@@ -236,6 +273,44 @@ abstract contract TimeBase {
             address(this),
             now.add(60)
         );
+    }
+
+    function _takeFeeTimeToSnob(uint256 _keep) internal {
+        address[] memory path = new address[](3);
+        path[0] = Time;
+        path[1] = wavax;
+        path[2] = snob;
+        IERC20(Time).safeApprove(joeRouter, 0);
+        IERC20(Time).safeApprove(joeRouter, _keep);
+        _swapTraderJoeWithPath(path, _keep);
+        uint256 _snob = IERC20(snob).balanceOf(address(this));
+        uint256 _share = _snob.mul(revenueShare).div(revenueShareMax);
+        IERC20(snob).safeTransfer(feeDistributor, _share);
+        IERC20(snob).safeTransfer(
+            IController(controller).treasury(),
+            _snob.sub(_share)
+        );
+    }
+
+
+    function _distributePerformanceFeesAndDeposit() internal {
+        uint256 _want = IERC20(want).balanceOf(address(this));
+
+        if (_want > 0) {
+            // Redeposit into contract
+            IERC20(want).safeTransfer(
+                IController(controller).treasury(),
+                _want.mul(performanceTreasuryFee).div(performanceTreasuryMax)
+            );
+
+            // Performance fee
+            IERC20(want).safeTransfer(
+                IController(controller).devfund(),
+                _want.mul(performanceDevFee).div(performanceDevMax)
+            );
+
+            deposit();
+        }
     }
 
 }
