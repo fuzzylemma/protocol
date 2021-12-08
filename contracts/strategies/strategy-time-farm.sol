@@ -70,8 +70,9 @@ abstract contract TimeFarm is TimeBase{
     // Deposits other asset to be minted into Time and then staked 
     function depositIntoTime() public override {
         uint256 _amount = IERC20(want).balanceOf(address(this));
-        ITimeTreasury(treasury).deposit(_amount, want, profit);
-        deposit();  
+        uint256 _profit = ITimeTreasury(treasury).valueOf(Time, _amount); 
+        ITimeTreasury(treasury).deposit(_amount, want, _profit);
+        //deposit();  
     }
 
     /**

@@ -28,14 +28,25 @@ interface IWarmup {
 enum CONTRACTS { DISTRIBUTOR, WARMUP, LOCKER }
 
 interface ITimeStaking {
+    /** @notice stake Time to enter warmup
+        @param _amount uint
+        @return bool
+     */
     function stake(uint _amount, address _recipient) external view returns ( bool ); 
 
+
+    /**
+        @notice retrieve MEMO from warmup
+        @param _recipient address
+     */
     function claim(address _recipient) external; 
 
+    // returns the MEMO index, which tracks rebase growth
     function index() external view returns ( uint ); 
 
     function unstake(uint256 _amount, bool _trigger) external; 
 
+    // returns contract Time holdings, including bonuses provided
     function contractBalance() external view returns ( uint );
 
     function forfeit() external; 
@@ -48,8 +59,14 @@ interface ITimeStaking {
 
     function setWarmup( uint _warmupPeriod) external; 
 
+     /**
+        @notice sets the contract address for LP staking
+        @param _contract address
+     */
     function setContract( CONTRACTS _contract, address _address ) external; 
     
+   
+    // trigger rebase if epoch over
     function rebase() external; 
 }
 
