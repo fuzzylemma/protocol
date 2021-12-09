@@ -18,12 +18,16 @@ abstract contract TimeBase {
     using SafeMath for uint32;
     using SafeERC20 for IERC20;
 
+
+    // staking contract for rewards 
+    address public staking = 0x4456B87Af11e87E329AB7d7C7A246ed1aC2168B9; 
+
     // Tokens
     address public want; 
     address public constant joe = 0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd;
     address public constant wavax = 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7;
     address public constant snob = 0xC38f41A296A4493Ff429F1238e030924A1542e50;
-    address public constant Time = 0xb54f16fB19478766A268F172C9480f8da1a7c9C3;
+    address public constant Time = 0xb54f16fB19478766A268F172C9480f8da1a7c9C3;          // token given as payment for bond
     address public constant Memories = 0x136Acd46C134E8269052c62A67042D6bDeDde3C9;
 
     address public stakingHelper;                                                       // to stake and claim if no staking warmup
@@ -181,8 +185,6 @@ abstract contract TimeBase {
 
     function depositIntoTime() public virtual;
 
-    function stakeOrSend ( address _recipient, bool _stake, uint _amount ) public virtual returns (uint256); 
-
     // Controller only function for creating additional rewards from dust
     function withdraw(IERC20 _asset) external returns (uint256 balance) {
         require(msg.sender == controller, "!controller");
@@ -292,6 +294,20 @@ abstract contract TimeBase {
         );
     }
 
+    function stakeOrSend( address _recipient, bool _stake, uint _amount ) internal returns ( uint ) {
+        if ( !_stake ) { // if user does not want to stake
+            IERC20(Time).transfer( _recipient, _amount ); // send payout
+        } else { // if user wants to stake
+            if ( useHelper ) { // use if staking warmup is 0
+                IERC20(Time).approve( address(stakingHelper), _amount );
+                IStakingHelper(stakingHelper).stake( _amount, _recipient );
+            } else {
+                IERC20(Time).approve( address(staking), _amount );
+                IStaking(staking).stake( _amount, _recipient );
+            }
+        }
+        return _amount;
+    }
 
     function _distributePerformanceFeesAndDeposit() internal {
         uint256 _want = IERC20(want).balanceOf(address(this));

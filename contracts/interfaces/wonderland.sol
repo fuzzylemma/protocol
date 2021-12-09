@@ -25,50 +25,50 @@ interface IWarmup {
     function retrieve( address staker_, uint amount_ ) external;
 }
 
-enum CONTRACTS { DISTRIBUTOR, WARMUP, LOCKER }
+// enum CONTRACTS { DISTRIBUTOR, WARMUP, LOCKER }
 
-interface ITimeStaking {
-    /** @notice stake Time to enter warmup
-        @param _amount uint
-        @return bool
-     */
-    function stake(uint _amount, address _recipient) external view returns ( bool ); 
+// interface ITimeStaking {
+//     /** @notice stake Time to enter warmup
+//         @param _amount uint
+//         @return bool
+//      */
+//     function stake(uint _amount, address _recipient) external view returns ( bool ); 
 
 
-    /**
-        @notice retrieve MEMO from warmup
-        @param _recipient address
-     */
-    function claim(address _recipient) external; 
+//     /**
+//         @notice retrieve MEMO from warmup
+//         @param _recipient address
+//      */
+//     function claim(address _recipient) external; 
 
-    // returns the MEMO index, which tracks rebase growth
-    function index() external view returns ( uint ); 
+//     // returns the MEMO index, which tracks rebase growth
+//     function index() external view returns ( uint ); 
 
-    function unstake(uint256 _amount, bool _trigger) external; 
+//     function unstake(uint256 _amount, bool _trigger) external; 
 
-    // returns contract Time holdings, including bonuses provided
-    function contractBalance() external view returns ( uint );
+//     // returns contract Time holdings, including bonuses provided
+//     function contractBalance() external view returns ( uint );
 
-    function forfeit() external; 
+//     function forfeit() external; 
 
-    function giveLockBonus( uint _amount) external; 
+//     function giveLockBonus( uint _amount) external; 
 
-    function returnLockBonus(uint _amount) external;
+//     function returnLockBonus(uint _amount) external;
 
-    function toggleDepositLock() external;
+//     function toggleDepositLock() external;
 
-    function setWarmup( uint _warmupPeriod) external; 
+//     function setWarmup( uint _warmupPeriod) external; 
 
-     /**
-        @notice sets the contract address for LP staking
-        @param _contract address
-     */
-    function setContract( CONTRACTS _contract, address _address ) external; 
+//      /**
+//         @notice sets the contract address for LP staking
+//         @param _contract address
+//      */
+//     function setContract( CONTRACTS _contract, address _address ) external; 
     
    
-    // trigger rebase if epoch over
-    function rebase() external; 
-}
+//     // trigger rebase if epoch over
+//     function rebase() external; 
+// }
 
 interface ITreasury {
     function deposit( uint _amount, address _token, uint _profit ) external returns ( bool );
@@ -112,6 +112,7 @@ interface ITimeTreasury {
 
 interface IStaking {
     function stake( uint _amount, address _recipient ) external returns ( bool );
+    function claim( address _recipient ) external;
 }
 
 interface IStakingHelper {

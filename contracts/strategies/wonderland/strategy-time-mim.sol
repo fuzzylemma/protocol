@@ -8,9 +8,6 @@ abstract contract StrategyTimeMim is TimeFarm {
     // want token for depositing into depositLP for minting Time
     address public mim = 0x130966628846BFd36ff31a822705796e8cb8C18D;
 
-    // staking contract for rewards 
-    address public staking = 0x4456B87Af11e87E329AB7d7C7A246ed1aC2168B9; 
-
 
     constructor(
         address _governance,
