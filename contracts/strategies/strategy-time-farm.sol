@@ -28,6 +28,8 @@ abstract contract TimeFarm is TimeBase{
         return amount; 
     }
 
+    receive() external payable {}
+    
     // Deposits the Time token in the staking contract 
     function deposit () public override {
         // the amount of Time tokens that you want to stake
