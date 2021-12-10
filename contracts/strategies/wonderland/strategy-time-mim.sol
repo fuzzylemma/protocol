@@ -7,7 +7,7 @@ abstract contract StrategyTimeMim is TimeFarm {
 
     // want token for depositing into depositLP for minting Time
     address public mim = 0x130966628846BFd36ff31a822705796e8cb8C18D;
-    address mimBond;
+    address public mimBond = 0x694738E0A438d90487b4a549b201142c1a97B556;
 
 
     constructor(
@@ -34,8 +34,8 @@ abstract contract StrategyTimeMim is TimeFarm {
         IERC20(want).safeApprove(mimBond, 0); 
         IERC20(want).safeApprove(mimBond, _amount); 
 
-        ITimeBondDepository(mimBond).deposit(_amount, maxPrice, address(this));
-        ITimeBondDepository(mimBond).redeem(address(this), _stake);
+        ITimeBondDepository(mimBond).deposit(_amount, maxPrice, address(this));     // deposit mim for time tokens
+        ITimeBondDepository(mimBond).redeem(address(this), _stake);                 // stake time tokens
 
         _initialMemo = IERC20(memo).balanceOf(address(this));
     }
