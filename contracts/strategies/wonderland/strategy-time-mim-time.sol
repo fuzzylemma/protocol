@@ -3,11 +3,12 @@ pragma solidity ^0.6.7;
 
 import "../strategy-time-farm.sol";
 
-abstract contract StrategyTimeAvaxTime is TimeFarm {
+abstract contract StrategyTimeMimTime is TimeFarm {
 
     // want/lp token for depositing into depositLP for minting Time
-    address public avax_time_lp = 0xf64e1c5B6E17031f5504481Ac8145F4c3eab4917;
-    address public avaxTimeBond = 0xc26850686ce755FFb8690EA156E5A6cf03DcBDE1;
+    address public mim_time_lp = 0x113f413371fC4CC4C9d6416cf1DE9dFd7BF747Df;
+    address public mimTimeBond = 0xA184AE1A71EcAD20E822cB965b99c287590c4FFe;
+    address public mim = 0x130966628846BFd36ff31a822705796e8cb8C18D;
 
 
     constructor(
@@ -18,8 +19,8 @@ abstract contract StrategyTimeAvaxTime is TimeFarm {
     )
         public
         TimeFarm(
-            avaxTimeBond,
-            avax_time_lp,
+            mimTimeBond,
+            mim_time_lp,
             _governance,
             _strategist,
             _controller,
@@ -29,27 +30,27 @@ abstract contract StrategyTimeAvaxTime is TimeFarm {
 
     // Deposit bond (lp or other token) so that we can get mint Time at a discount and autostake
     function depositBond() public override {
-        // Wrap the avax     
-        uint256 _avax = address(this).balance;              
-        if (_avax > 0) {                               
-            WAVAX(wavax).deposit{value: _avax}();
-        }
+        // // Wrap the avax     
+        // uint256 _avax = address(this).balance;              
+        // if (_avax > 0) {                               
+        //     WAVAX(wavax).deposit{value: _avax}();
+        // }
 
-        uint256 _wavax = IERC20(wavax).balanceOf(address(this));
+        uint256 _mim = IERC20(mim).balanceOf(address(this));
         uint256 _time = IERC20(time).balanceOf(address(this));
 
-        if (_wavax > 0 && _time > 0){
-            IERC20(wavax).safeApprove(joeRouter, 0);
-            IERC20(wavax).safeApprove(joeRouter, _wavax);
+        if (_mim > 0 && _time > 0){
+            IERC20(mim).safeApprove(joeRouter, 0);
+            IERC20(mim).safeApprove(joeRouter, _mim);
 
             IERC20(time).safeApprove(joeRouter, 0);
             IERC20(time).safeApprove(joeRouter, _time);
 
-            // Adds in liquidity for TIME/AVAX
+            // Adds in liquidity for TIME/MIM
             IJoeRouter(joeRouter).addLiquidity(
-                wavax,
+                mim,
                 time,
-                _wavax,
+                _mim,
                 _time,
                 0,
                 0, 
@@ -60,11 +61,11 @@ abstract contract StrategyTimeAvaxTime is TimeFarm {
 
         uint256 _amount = IERC20(want).balanceOf(address(this));
 
-        IERC20(avax_time_lp).safeApprove(avaxTimeBond, 0);
-        IERC20(avax_time_lp).safeApprove(avaxTimeBond, _amount);
+        IERC20(mim_time_lp).safeApprove(mimTimeBond, 0);
+        IERC20(mim_time_lp).safeApprove(mimTimeBond, _amount);
 
-        ITimeBondDepository(avaxTimeBond).deposit(_amount, maxPrice, address(this));
-        ITimeBondDepository(avaxTimeBond).redeem(address(this), _stake);
+        ITimeBondDepository(mimTimeBond).deposit(_amount, maxPrice, address(this));
+        ITimeBondDepository(mimTimeBond).redeem(address(this), _stake);
 
         _initialMemo = IERC20(memo).balanceOf(address(this));
     }
@@ -72,6 +73,6 @@ abstract contract StrategyTimeAvaxTime is TimeFarm {
     // **** Views ****
 
     function getName() external pure override returns (string memory) {
-        return "StrategyTimeAvaxTime";
+        return "StrategyTimeMimTime";
     }
 }
