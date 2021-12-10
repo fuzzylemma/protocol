@@ -19,12 +19,8 @@ abstract contract TimeBase {
     using SafeMath for uint32;
     using SafeERC20 for IERC20;
 
-
     // staking contract for rewards 
     address public staking = 0x4456B87Af11e87E329AB7d7C7A246ed1aC2168B9;
-    
-    uint256 public maxPrice; 
-    
 
     // Tokens
     address public want;  
@@ -74,8 +70,6 @@ abstract contract TimeBase {
     address public strategist;
     address public timelock;
 
-    address public distributor;
-
     mapping(address => bool) public harvesters;
 
 
@@ -122,13 +116,23 @@ abstract contract TimeBase {
         return balanceOfWant().add(balanceOfPool());
     }
 
-    function balanceOfTime() public virtual view returns (uint256);
-
     function getName() external virtual pure returns (string memory);
-  
+
+    // **** Setters **** //
+
+    function setKeep(uint256 _keep) external {
+        require(msg.sender == timelock, "!timelock");
+        keep = _keep;
+    }
+
+    function setRevenueShare(uint256 _share) external {
+        require(msg.sender == timelock, "!timelock");
+        revenueShare = _share;
+    }
+
     function whitelistHarvester(address _harvester) external {
         require(msg.sender == governance ||
-            msg.sender == strategist, "not authorized");
+             msg.sender == strategist, "not authorized");
         harvesters[_harvester] = true;
     }
 
@@ -138,7 +142,7 @@ abstract contract TimeBase {
         harvesters[_harvester] = false;
     }
 
-     function setFeeDistributor(address _feeDistributor) external {
+    function setFeeDistributor(address _feeDistributor) external {
         require(msg.sender == governance, "not authorized");
         feeDistributor = _feeDistributor;
     }
@@ -152,7 +156,7 @@ abstract contract TimeBase {
         require(msg.sender == timelock, "!timelock");
         withdrawalTreasuryFee = _withdrawalTreasuryFee;
     }
-
+  
     function setPerformanceDevFee(uint256 _performanceDevFee) external {
         require(msg.sender == timelock, "!timelock");
         performanceDevFee = _performanceDevFee;
@@ -165,7 +169,7 @@ abstract contract TimeBase {
         performanceTreasuryFee = _performanceTreasuryFee;
     }
 
-        function setStrategist(address _strategist) external {
+    function setStrategist(address _strategist) external {
         require(msg.sender == governance, "!governance");
         strategist = _strategist;
     }
@@ -184,7 +188,7 @@ abstract contract TimeBase {
         require(msg.sender == timelock, "!timelock");
         controller = _controller;
     }
-
+    
     // **** State mutations **** //
     function deposit() public virtual;
 
@@ -226,13 +230,79 @@ abstract contract TimeBase {
         IERC20(want).safeTransfer(_globe, _amount.sub(_feeDev).sub(_feeTreasury));
     }
 
-    function harvest() public virtual;
+    // Withdraw funds, used to swap between strategies
+    function withdrawForSwap(uint256 _amount)
+        external
+        returns (uint256 balance)
+    {
+        require(msg.sender == controller, "!controller");
+        _withdrawSome(_amount);
+
+        balance = IERC20(want).balanceOf(address(this));
+
+        address _globe = IController(controller).globes(address(want));
+        require(_globe != address(0), "!globe");
+        IERC20(want).safeTransfer(_globe, balance);
+    }
+
+    // Withdraw all funds, normally used when migrating strategies
+    function withdrawAll() external returns (uint256 balance) {
+        require(msg.sender == controller, "!controller");
+        _withdrawAll();
+
+        balance = IERC20(want).balanceOf(address(this));
+
+        address _globe = IController(controller).globes(address(want));
+        require(_globe != address(0), "!globe"); // additional protection so we don't burn the funds
+        IERC20(want).safeTransfer(_globe, balance);
+    }
 
     function _withdrawAll() internal {
         _withdrawSome(balanceOfPool());
     }
 
     function _withdrawSome(uint256 _amount) internal virtual returns (uint256);
+
+    function harvest() public virtual;
+
+    // **** Emergency functions **** //
+
+    function execute(address _target, bytes memory _data)
+        public
+        payable
+        returns (bytes memory response)
+    {
+        require(msg.sender == timelock, "!timelock");
+        require(_target != address(0), "!target");
+
+        // call contract in current context
+        assembly {
+            let succeeded := delegatecall(
+                sub(gas(), 5000),
+                _target,
+                add(_data, 0x20),
+                mload(_data),
+                0,
+                0
+            )
+            let size := returndatasize()
+
+            response := mload(0x40)
+            mstore(
+                0x40,
+                add(response, and(add(add(size, 0x20), 0x1f), not(0x1f)))
+            )
+            mstore(response, size)
+            returndatacopy(add(response, 0x20), 0, size)
+
+            switch iszero(succeeded)
+                case 1 {
+                    // throw if delegatecall failed
+                    revert(add(response, 0x20), size)
+                }
+        }
+    }
+
 
     // **** Internal functions ****
     function _swapTraderJoe(
