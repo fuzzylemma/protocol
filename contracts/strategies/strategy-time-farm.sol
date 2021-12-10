@@ -4,15 +4,10 @@ pragma solidity ^0.6.7;
 import "./strategy-wonderland-base.sol";
 
 abstract contract TimeFarm is TimeBase{
-
-    address public treasury = 0x1c46450211CB2646cc1DA3c5242422967eD9e04c;
-
     uint256 public _initialMemo; 
     address public bond;
 
-
-    uint profit;
-    uint256 public _initial; 
+    uint256 public _initial;        // initial amount of memories/time for harvesting later 
 
     constructor( 
         address _bond,
