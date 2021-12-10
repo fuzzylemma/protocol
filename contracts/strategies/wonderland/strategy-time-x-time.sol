@@ -3,7 +3,7 @@ pragma solidity ^0.6.7;
 
 import "../strategy-time-farm.sol";
 
-abstract contract StrategyTimexTime is TimeFarm {
+abstract contract StrategyTimeXTime is TimeFarm {
 
     constructor(
         address _governance,
