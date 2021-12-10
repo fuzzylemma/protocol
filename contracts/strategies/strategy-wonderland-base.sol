@@ -22,6 +22,8 @@ abstract contract TimeBase {
     // staking contract for rewards 
     address public staking = 0x4456B87Af11e87E329AB7d7C7A246ed1aC2168B9;
 
+    uint256 public maxPrice;
+
     // Tokens
     address public want;  
     address public constant joe = 0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd;
