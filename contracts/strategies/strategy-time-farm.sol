@@ -5,62 +5,59 @@ import "./strategy-wonderland-base.sol";
 
 abstract contract TimeFarm is TimeBase{
 
-    address public rewards; 
     address public treasury = 0x1c46450211CB2646cc1DA3c5242422967eD9e04c;
-    address bondToken; 
+
+    uint256 public _initialMemo; 
+    address public bond;
 
 
     uint profit;
     uint256 public _initial; 
 
     constructor( 
-        address _rewards,
-        address _mint,
+        address _bond,
+        address _want,
         address _governance,
         address _strategist,
         address _controller,
         address _timelock
     ) 
         public 
-        TimeBase(_mint, _governance, _strategist, _controller, _timelock)
+        TimeBase(_want, _governance, _strategist, _controller, _timelock)
     {
-        rewards = _rewards; 
+        bond = _bond;
     }
 
-    function getHarvestable() external view returns (uint256) {
-        return IMemo(Memories).index();
+    function balanceOfPool() public view override returns (uint256) {
+        uint256 amount = IMemo(memo).balanceOf(address(this));
+        return amount; 
     }
-
 
     // Deposits the Time token in the staking contract 
     function deposit () public override {
         // the amount of Time tokens that you want to stake
-        uint256 _want = IERC20(Time).balanceOf(address(this));
-        if (_want > 0){
-            IERC20(Time).safeApprove(rewards, 0);
-            IERC20(Time).safeApprove(rewards, _want);
-            IStaking(rewards).stake(_want, address(this));
+        uint256 _amount = IERC20(time).balanceOf(address(this)); 
+
+        if (_amount > 0){
+             if ( useHelper ) { // use if staking warmup is 0
+                IERC20(time).safeApprove( address(stakingHelper), 0 );
+                IERC20(time).safeApprove( address(stakingHelper), _amount );
+                IStakingHelper(stakingHelper).stake( _amount, address(this) );
+            } else {
+                IERC20(time).safeApprove( address(staking), 0 );
+                IERC20(time).safeApprove( address(staking), _amount );
+                IStaking(staking).stake( _amount, address(this) );
+            }
         }
+        _initialMemo = IERC20(memo).balanceOf(address(this));
     }
 
-    // Bond deposit so that we can get discounted time minted and staked 
-    function depositIntoTime() public override {
-        uint256 _amount = IERC20(bondToken).balanceOf(address(this));
-
-        uint256 _profit = ITreasury(treasury).valueOf(bondToken, _amount);
-        ITreasury(treasury).deposit(_amount, want, _profit);
-     
-    }
-
-    /**
-        calls the unstake function that rebases to get the right proportion of the treasury balancer, 
-        i.e. determine the amount of MEMOries tokens accumulated during vesting period. 
-        As well transfers MEMOries token to Time tokens
-    */
+   
     function harvest() public override onlyBenevolent {
-        
-        // find how much we have grown by at a particular epoch period 
-        uint256 _amount = IMemo(Memories).index(); 
+        ITimeStaking(staking).rebase();  
+
+        uint256 _rebaseMemo = IERC20(memo).balanceOf(address(this));
+        uint _amount = _rebaseMemo.sub(_initialMemo);
 
         if (_amount > 0) {
             // 10% locked up for future governance
@@ -69,13 +66,14 @@ abstract contract TimeFarm is TimeBase{
                 _takeFeeTimeToSnob(_keep);
             }
         }
-
-        // restake or unstake the current value left 
-        _amount = IERC20(Memories).balanceOf(address(this));
-
-        bool _stake; 
-        stakeOrSend(address(this), _stake, _amount);
     }
 
+    function _withdrawSome(uint256 _amount) internal override returns (uint256) {
+        IERC20(memo).safeApprove(staking, 0);
+        IERC20(memo).safeApprove(staking, _amount);
+        ITimeStaking(staking).unstake(_amount, true); 
+
+        return _amount;
+    }
 
 }
