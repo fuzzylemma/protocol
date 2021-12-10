@@ -25,50 +25,6 @@ interface IWarmup {
     function retrieve( address staker_, uint amount_ ) external;
 }
 
-// enum CONTRACTS { DISTRIBUTOR, WARMUP, LOCKER }
-
-// interface ITimeStaking {
-//     /** @notice stake Time to enter warmup
-//         @param _amount uint
-//         @return bool
-//      */
-//     function stake(uint _amount, address _recipient) external view returns ( bool ); 
-
-
-//     /**
-//         @notice retrieve MEMO from warmup
-//         @param _recipient address
-//      */
-//     function claim(address _recipient) external; 
-
-//     // returns the MEMO index, which tracks rebase growth
-//     function index() external view returns ( uint ); 
-
-//     function unstake(uint256 _amount, bool _trigger) external; 
-
-//     // returns contract Time holdings, including bonuses provided
-//     function contractBalance() external view returns ( uint );
-
-//     function forfeit() external; 
-
-//     function giveLockBonus( uint _amount) external; 
-
-//     function returnLockBonus(uint _amount) external;
-
-//     function toggleDepositLock() external;
-
-//     function setWarmup( uint _warmupPeriod) external; 
-
-//      /**
-//         @notice sets the contract address for LP staking
-//         @param _contract address
-//      */
-//     function setContract( CONTRACTS _contract, address _address ) external; 
-    
-   
-//     // trigger rebase if epoch over
-//     function rebase() external; 
-// }
 
 interface ITreasury {
     function deposit( uint _amount, address _token, uint _profit ) external returns ( bool );
@@ -93,21 +49,11 @@ interface ITimeBondDepository {
     function redeem( address _recipient, bool _stake ) external returns ( uint );
 
     function stakeOrSend( address _recipient, bool _stake, uint _amount ) external returns ( uint );
-
 }
 
-
-
-// needed and used 
-interface ITimeTreasury {
-    function deposit( uint _amount, address _token, uint _profit ) external returns ( uint send_ ); 
-    
-    function withdraw( uint _amount, address _token ) external; 
-
-    function mintRewards( address _recipient, uint _amount ) external; 
-
-    function valueOf( address _token, uint _amount ) external view returns ( uint value_ ); 
-   
+interface ITimeStaking {
+    function rebase() external;
+    function unstake( uint _amount, bool _trigger) external;
 }
 
 interface IStaking {
