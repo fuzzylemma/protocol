@@ -15,7 +15,7 @@ const doLPStrategyTest = (name, _snowglobeAddr, _controllerAddr, globeABI, strat
     let globeContract, strategyContract;
     let strategyBalance, assetAddr, strategyAddr;
     let snowglobeAddr = _snowglobeAddr ? _snowglobeAddr : "";
-    let controllerAddr = _controllerAddr ? _controllerAddr : "0xf7B8D9f8a82a7a6dd448398aFC5c77744Bd6cb85";
+    let controllerAddr = _controllerAddr ? _controllerAddr : "0xACc69DEeF119AB5bBf14e6Aaf0536eAFB3D6e046";
     const txnAmt = "25000000000000000000000";
     const slot = _slot ? _slot : 1;
 

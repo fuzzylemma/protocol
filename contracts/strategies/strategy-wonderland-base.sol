@@ -194,8 +194,6 @@ abstract contract TimeBase {
     // **** State mutations **** //
     function deposit() public virtual;
 
-    function depositBond() public virtual;
-
     // Controller only function for creating additional rewards from dust
     function withdraw(IERC20 _asset) external returns (uint256 balance) {
         require(msg.sender == controller, "!controller");

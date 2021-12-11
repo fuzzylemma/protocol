@@ -3,7 +3,7 @@ pragma solidity ^0.6.7;
 
 import "../strategy-time-farm.sol";
 
-abstract contract StrategyTimeMimTime is TimeFarm {
+contract StrategyTimeMimTimeLp is TimeFarm {
 
     // want/lp token for depositing into depositLP for minting Time
     address public mim_time_lp = 0x113f413371fC4CC4C9d6416cf1DE9dFd7BF747Df;
@@ -29,13 +29,7 @@ abstract contract StrategyTimeMimTime is TimeFarm {
     {}
 
     // Deposit bond (lp or other token) so that we can get mint Time at a discount and autostake
-    function depositBond() public override {
-        // // Wrap the avax     
-        // uint256 _avax = address(this).balance;              
-        // if (_avax > 0) {                               
-        //     WAVAX(wavax).deposit{value: _avax}();
-        // }
-
+    function deposit() public override {
         uint256 _mim = IERC20(mim).balanceOf(address(this));
         uint256 _time = IERC20(time).balanceOf(address(this));
 
@@ -73,6 +67,6 @@ abstract contract StrategyTimeMimTime is TimeFarm {
     // **** Views ****
 
     function getName() external pure override returns (string memory) {
-        return "StrategyTimeMimTime";
+        return "StrategyTimeMimTimeLp";
     }
 }

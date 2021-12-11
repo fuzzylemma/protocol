@@ -29,41 +29,30 @@ abstract contract TimeFarm is TimeBase{
     }
 
     receive() external payable {}
-    
-    // Deposits the Time token in the staking contract 
-    function deposit () public override {
-        // the amount of Time tokens that you want to stake
-        uint256 _amount = IERC20(time).balanceOf(address(this)); 
 
-        if (_amount > 0){
-             if ( useHelper ) { // use if staking warmup is 0
-                IERC20(time).safeApprove( address(stakingHelper), 0 );
-                IERC20(time).safeApprove( address(stakingHelper), _amount );
-                IStakingHelper(stakingHelper).stake( _amount, address(this) );
-            } else {
-                IERC20(time).safeApprove( address(staking), 0 );
-                IERC20(time).safeApprove( address(staking), _amount );
-                IStaking(staking).stake( _amount, address(this) );
-            }
-        }
-        _initialMemo = IERC20(memo).balanceOf(address(this));
+    function getHarvestable() external view returns (uint256, uint256) {
+        uint256 pendingMemories = IERC20(memo).balanceOf(address(this));
+        uint256 profit = _initialMemo.sub(pendingMemories); 
+        return (pendingMemories, profit);
     }
 
-   
     function harvest() public override onlyBenevolent {
         ITimeStaking(staking).rebase();  
 
-        uint256 _rebaseMemo = IERC20(memo).balanceOf(address(this));
-        uint _amount = _rebaseMemo.sub(_initialMemo);
+        if (want != time) {
+            uint256 _rebaseMemo = IERC20(memo).balanceOf(address(this));
+            uint _amount = _rebaseMemo.sub(_initialMemo);
 
-        if (_amount > 0) {
-            // 10% locked up for future governance
-            uint256 _keep = _amount.mul(keep).div(keepMax);
-            if (_keep > 0) {
-                _takeFeeTimeToSnob(_keep);
+            if (_amount > 0) {
+                // 10% locked up for future governance
+                uint256 _keep = _amount.mul(keep).div(keepMax);
+                if (_keep > 0) {
+                    _takeFeeTimeToSnob(_keep);
+                }
             }
         }
     }
+    
 
     function _withdrawSome(uint256 _amount) internal override returns (uint256) {
         IERC20(memo).safeApprove(staking, 0);
