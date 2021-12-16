@@ -5,7 +5,7 @@ import "../strategy-joe-rush-farm-base.sol";
 
 contract StrategyJoeAvaxClyLp is StrategyJoeRushFarmBase {
 
-    uint256 public avax_cly_poolId;
+    uint256 public avax_cly_poolId = 25;
 
     address public joe_avax_cly_lp = 0x0B2777b0c55AEaAeb56E86B6eEFa6cC2Cfa00e07;
     address public cly = 0xec3492a2508DDf4FDc0cD76F31f340b30d1793e6;
@@ -28,8 +28,7 @@ contract StrategyJoeAvaxClyLp is StrategyJoeRushFarmBase {
         )
     {}
 
-
-     function _takeFeegClyToSnob(uint256 _keep) internal {
+    function _takeFeegClyToSnob(uint256 _keep) internal {
         address[] memory path = new address[](3);
         path[0] = cly;
         path[1] = wavax;
@@ -56,8 +55,8 @@ contract StrategyJoeAvaxClyLp is StrategyJoeRushFarmBase {
         IMasterChefJoeV2(masterChefJoeV3).deposit(poolId, 0);
 
         // Take Avax Rewards    
-        uint256 _avax = address(this).balance;              // get balance of native Avax
-        if (_avax > 0) {                                    // wrap avax into ERC20
+        uint256 _avax = address(this).balance;              // get balance of native AVAX
+        if (_avax > 0) {                                    // wrap AVAX into ERC20
             WAVAX(wavax).deposit{value: _avax}();
         }
         
