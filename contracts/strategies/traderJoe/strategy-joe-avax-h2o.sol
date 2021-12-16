@@ -3,12 +3,12 @@ pragma solidity ^0.6.7;
 
 import "../strategy-joe-rush-farm-base.sol";
 
-contract StrategyJoeAvaxPtpLp is StrategyJoeRushFarmBase {
+contract StrategyJoeAvaxH2OLp is StrategyJoeRushFarmBase {
 
-    uint256 public avax_ptp_poolId = ;
+    uint256 public avax_h2o_poolId = 27;
 
-    address public joe_avax_ptp_lp = ;
-    address public ptp = ;
+    address public joe_avax_h2o_lp = 0x9615a11eAA912eAE869E9c1097df263Fc3E105F3;
+    address public h2o = 0x026187BdbC6b751003517bcb30Ac7817D5B766f8;
 
 
     constructor(
@@ -19,8 +19,8 @@ contract StrategyJoeAvaxPtpLp is StrategyJoeRushFarmBase {
     )
         public
         StrategyJoeRushFarmBase(
-            avax_ptp_poolId,
-            joe_avax_ptp_lp,
+            avax_h2o_poolId,
+            joe_avax_h2o_lp,
             _governance,
             _strategist,
             _controller,
@@ -28,13 +28,13 @@ contract StrategyJoeAvaxPtpLp is StrategyJoeRushFarmBase {
         )
     {}
 
-    function _takeFeegPtpToSnob(uint256 _keep) internal {
+    function _takeFeeH2OToSnob(uint256 _keep) internal {
         address[] memory path = new address[](3);
-        path[0] = ptp;
+        path[0] = h2o;
         path[1] = wavax;
         path[2] = snob;
-        IERC20(ptp).safeApprove(joeRouter, 0);
-        IERC20(ptp).safeApprove(joeRouter, _keep);
+        IERC20(h2o).safeApprove(joeRouter, 0);
+        IERC20(h2o).safeApprove(joeRouter, _keep);
         _swapTraderJoeWithPath(path, _keep);
         uint256 _snob = IERC20(snob).balanceOf(address(this));
         uint256 _share = _snob.mul(revenueShare).div(revenueShareMax);
@@ -51,17 +51,17 @@ contract StrategyJoeAvaxPtpLp is StrategyJoeRushFarmBase {
     // **** State Mutations ****
 
     function harvest() public override onlyBenevolent {
-        // Collects JOE tokens
+        // Collects Joe tokens
         IMasterChefJoeV2(masterChefJoeV3).deposit(poolId, 0);
 
-        // Take AVAX Rewards    
+        // Take Avax Rewards    
         uint256 _avax = address(this).balance;              // get balance of native AVAX
         if (_avax > 0) {                                    // wrap AVAX into ERC20
             WAVAX(wavax).deposit{value: _avax}();
         }
         
-        uint256 _ptp = IERC20(ptp).balanceOf(address(this));      //get balance of PTP Tokens
-        uint256 _wavax = IERC20(wavax).balanceOf(address(this));  //get balance of WAVAX
+        uint256 _h2o = IERC20(h2o).balanceOf(address(this));   //get balance of H2O Tokens
+        uint256 _wavax = IERC20(wavax).balanceOf(address(this)); //get balance of Wavax
         if (_wavax > 0) {
             uint256 _keep1 = _wavax.mul(keep).div(keepMax);
             if (_keep1 > 0){
@@ -72,28 +72,28 @@ contract StrategyJoeAvaxPtpLp is StrategyJoeRushFarmBase {
 
         }
 
-         if (_ptp > 0) {
-            uint256 _keep2 = _ptp.mul(keep).div(keepMax);
+         if (_h2o > 0) {
+            uint256 _keep2 = _h2o.mul(keep).div(keepMax);
             if (_keep2 > 0){
-                _takeFeegptpToSnob(_keep2);
+                _takeFeeH2OToSnob(_keep2);
             }
             
-            _ptp = IERC20(ptp).balanceOf(address(this));
+            _h2o = IERC20(h2o).balanceOf(address(this));
           
         }
 
-        // In the case of PTP Rewards, swap PTP for WAVAX
-        if(_ptp > 0){
-            IERC20(ptp).safeApprove(joeRouter, 0);
-            IERC20(ptp).safeApprove(joeRouter, _ptp.div(2));   
-            _swapTraderJoe(ptp, wavax, _ptp.div(2));
+        // In the case of H2O Rewards, swap H2O for wavax
+        if(_h2o > 0){
+            IERC20(h2o).safeApprove(joeRouter, 0);
+            IERC20(h2o).safeApprove(joeRouter, _h2o.div(2));   
+            _swapTraderJoe(h2o, wavax, _h2o.div(2));
         }
 
-        // In the case of AVAX Rewards, swap WAVAX for PTP
+        // In the case of Avax Rewards, swap wavax for H2O
         if(_wavax > 0){
             IERC20(wavax).safeApprove(joeRouter, 0);
             IERC20(wavax).safeApprove(joeRouter, _wavax.div(2));   
-            _swapTraderJoe(wavax, ptp, _wavax.div(2)); 
+            _swapTraderJoe(wavax, h2o, _wavax.div(2)); 
         }
 
         
@@ -111,25 +111,25 @@ contract StrategyJoeAvaxPtpLp is StrategyJoeRushFarmBase {
             IERC20(joe).safeApprove(joeRouter, _joe);
 
             _swapTraderJoe(joe, wavax, _joe.div(2));
-            _swapTraderJoe(joe, ptp, _joe.div(2));
+            _swapTraderJoe(joe, h2o, _joe.div(2));
         }
 
-        // Adds in liquidity for AVAX/PTP
+        // Adds in liquidity for AVAX/H2O
         _wavax = IERC20(wavax).balanceOf(address(this));
-        _ptp = IERC20(ptp).balanceOf(address(this));
+        _h2o = IERC20(h2o).balanceOf(address(this));
 
-        if (_wavax > 0 && _ptp > 0) {
+        if (_wavax > 0 && _h2o > 0) {
             IERC20(wavax).safeApprove(joeRouter, 0);
             IERC20(wavax).safeApprove(joeRouter, _wavax);
 
-            IERC20(ptp).safeApprove(joeRouter, 0);
-            IERC20(ptp).safeApprove(joeRouter, _ptp);
+            IERC20(h2o).safeApprove(joeRouter, 0);
+            IERC20(h2o).safeApprove(joeRouter, _h2o);
 
             IJoeRouter(joeRouter).addLiquidity(
                 wavax,
-                ptp,
+                h2o,
                 _wavax,
-                _ptp,
+                _h2o,
                 0,
                 0,
                 address(this),
@@ -138,7 +138,7 @@ contract StrategyJoeAvaxPtpLp is StrategyJoeRushFarmBase {
 
             // Donates DUST
             _wavax = IERC20(wavax).balanceOf(address(this));
-            _ptp = IERC20(ptp).balanceOf(address(this));
+            _h2o = IERC20(h2o).balanceOf(address(this));
             if (_wavax > 0){
                 IERC20(wavax).transfer(
                     IController(controller).treasury(),
@@ -146,10 +146,10 @@ contract StrategyJoeAvaxPtpLp is StrategyJoeRushFarmBase {
                 );
             }
             
-            if (_ptp > 0){
-                IERC20(ptp).safeTransfer(
+            if (_h2o > 0){
+                IERC20(h2o).safeTransfer(
                     IController(controller).treasury(),
-                    _ptp
+                    _h2o
                 );
             }  
         }
@@ -160,6 +160,6 @@ contract StrategyJoeAvaxPtpLp is StrategyJoeRushFarmBase {
     // **** Views ****
 
     function getName() external override pure returns (string memory) {
-        return "StrategyJoeAvaxPtpLp";
+        return "StrategyJoeAvaxH2OLp";
     }
 }

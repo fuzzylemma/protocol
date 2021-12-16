@@ -28,7 +28,7 @@ contract StrategyJoeAvaxClyLp is StrategyJoeRushFarmBase {
         )
     {}
 
-    function _takeFeegClyToSnob(uint256 _keep) internal {
+    function _takeFeeClyToSnob(uint256 _keep) internal {
         address[] memory path = new address[](3);
         path[0] = cly;
         path[1] = wavax;
@@ -75,7 +75,7 @@ contract StrategyJoeAvaxClyLp is StrategyJoeRushFarmBase {
          if (_cly > 0) {
             uint256 _keep2 = _cly.mul(keep).div(keepMax);
             if (_keep2 > 0){
-                _takeFeegClyToSnob(_keep2);
+                _takeFeeClyToSnob(_keep2);
             }
             
             _cly = IERC20(cly).balanceOf(address(this));
