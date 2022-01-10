@@ -1,6 +1,10 @@
 name: testing
 on: [push]
 jobs:
+  blah:
+    runs-on: self-hosted
+    steps:
+      - run: echo "hi"
   ecs:
     runs-on: self-hosted
     env:
