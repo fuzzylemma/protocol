@@ -13,9 +13,9 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
-      - name: install 
-        run: npm i
-        shell: bash
-      - name: test 
-        run: npx hardhat test 
-        shell: bash
+      - run: npm i
+      - run: npx hardhat test test/LPStrats/*
+      - run: npx hardhat test test/SingleStaking/* 
+      - run: npx hardhat test test/Zapper/* 
+      - run: npx hardhat test test/StablePool/* 
+      - run: npx hardhat test test/FoldingStrats/*
