@@ -12,5 +12,5 @@ jobs:
         run: npm i && source .env.example 
         shell: bash
       - name: npx hardhat  
-        run: hardhat version 
+        run: npx hardhat version 
         shell: bash
