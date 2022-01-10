@@ -9,8 +9,5 @@ jobs:
         with:
           node-version: '16'
       - name: env
-        run: npm i && source .env.example 
-        shell: bash
-      - name: npx hardhat  
-        run: npx hardhat version 
+        run: npm i && source .env.example  && npx hardhat version
         shell: bash
