@@ -1,5 +1,11 @@
 name: testing
-on: [push]
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 jobs:
   lpstrats:
     runs-on: self-hosted
@@ -16,9 +22,6 @@ jobs:
       - run: npm i
       - run: npx hardhat test test/LPStrats/*
 
-name: testing0
-on: [push]
-jobs:
   singlestaking:
     runs-on: self-hosted
     env:
@@ -33,10 +36,6 @@ jobs:
           node-version: '16'
       - run: npm i
       - run: npx hardhat test test/SingleStaking/* 
-
-name: testing1
-on: [push]
-jobs:
   zapper:
     runs-on: self-hosted
     env:
@@ -52,9 +51,6 @@ jobs:
       - run: npm i
       - run: npx hardhat test test/Zapper/* 
 
-name: testing2
-on: [push]
-jobs:
   stablepool:
     runs-on: self-hosted
     env:
@@ -70,9 +66,7 @@ jobs:
       - run: npm i
       - run: npx hardhat test test/StablePool/* 
 
-name: testing3
-on: [push]
-jobs:
+
   foldingstrats:
     runs-on: self-hosted
     env:
